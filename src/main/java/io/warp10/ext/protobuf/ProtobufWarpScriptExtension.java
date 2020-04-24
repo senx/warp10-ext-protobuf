@@ -19,6 +19,8 @@ package io.warp10.ext.protobuf;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.warp10.ext.protobuf.PROTOC.ProtoDesc;
+import io.warp10.script.functions.TYPEOF;
 import io.warp10.warp.sdk.WarpScriptExtension;
 
 public class ProtobufWarpScriptExtension extends WarpScriptExtension {
@@ -33,10 +35,19 @@ public class ProtobufWarpScriptExtension extends WarpScriptExtension {
     functions.put(PROTOC, new PROTOC(PROTOC));
     functions.put("PB->", new PBTO("PB->"));
     functions.put("->PB", new TOPB("->PB"));
+    
+    TYPEOF.addResolver(new TYPEOF.TypeResolver() {      
+      @Override
+      public String typeof(Class clazz) {
+        if (clazz.isAssignableFrom(ProtoDesc.class)) {
+          return "PROTO";
+        }
+        return null;
+      }
+    });
   }
   @Override
   public Map<String, Object> getFunctions() {
     return functions;
   }
-
 }

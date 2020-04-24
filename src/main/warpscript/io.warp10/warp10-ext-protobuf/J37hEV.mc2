@@ -1,0 +1,60 @@
+{
+  'name' 'PB->'
+  'ext' 'io.warp10.ext.protobuf.ProtobufWarpScriptExtension'
+  'related' [ '->PB' 'PROTOC' ]
+  'desc'
+  <'
+ The `PB->` function parses a serialized [Protocol Buffers](https://developers.google.com/protocol-buffers) message and outputs a map with the message's content.
+
+The `PB->` function needs a description of the message to deserialize in the form of a `PROTO` instance as returned by `PROTOC`.
+  '>
+  'sig' [ [ [ 'name:STRING' 'proto:PROTO' 'data:BYTES'  ] [ 'message:MAP'  ] ] ] // Signature
+  'params' {
+    'proto' 'Internal representation of a Protocol Buffers `FileDescriptorSer`, as produced by `PROTOC`.'
+    'name' 'Name of the message descriptor to use for deserializing.'
+    'data' 'Serialized message as a byte array.'
+    'message' 'Map containing the deserialized message elements.'
+  }
+  'examples' [
+    <'
+//
+// Loads the definition of the following .proto as produced by
+// protoc --include_imports --descriptor_set_out=out in.proto
+//
+// in.proto:
+//
+// syntax = "proto3";
+//
+// message TestMessage {
+//   int64 id = 1;
+//   string comment = 2;
+// }
+//
+'CkwKCXRzdC5wcm90byI3CgtUZXN0TWVzc2FnZRIOCgJpZBgBIAEoA1ICaWQSGAoHY29tbWVudBgCIAEoCVIHY29tbWVudGIGcHJvdG8z' B64->
+PROTOC
+'proto' STORE
+// Serialized message
+'082a120f48656c6c6f2050726f746f62756621' HEX-> 'data' STORE
+$data $proto 'TestMessage' PB->
+'>
+  ]
+} 'info' STORE
+
+<%
+  !$info INFO
+  SAVE 'context' STORE
+  <%
+    'PB->' EVAL
+  %>
+  <% // catch any exception
+    RETHROW
+  %>
+  <% // finally, restore the context
+    $context RESTORE
+  %> TRY
+%>
+'macro' STORE
+
+// Unit tests
+
+$macro

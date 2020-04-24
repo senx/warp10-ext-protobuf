@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
@@ -127,9 +128,10 @@ public class PBTO extends NamedWarpScriptFunction implements WarpScriptStackFunc
     } else if (obj instanceof Integer || obj instanceof Long) {
       return ((Number) obj).longValue();
     } else if (obj instanceof String
-        || obj instanceof byte[]
         || obj instanceof Boolean) {
       return obj;
+    } else if (obj instanceof ByteString) {
+      return ((ByteString) obj).toByteArray();
     } else if (obj instanceof EnumValueDescriptor) {
       EnumValueDescriptor evd = ((EnumValueDescriptor) obj);
       return (evd.getName());

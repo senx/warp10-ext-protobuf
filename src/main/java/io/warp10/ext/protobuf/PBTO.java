@@ -18,6 +18,7 @@ package io.warp10.ext.protobuf;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -97,11 +98,24 @@ public class PBTO extends NamedWarpScriptFunction implements WarpScriptStackFunc
         
         if (value instanceof List) {
           List<Object> l = (List<Object>) value;
-          List<Object> ll = new ArrayList<Object>(l.size());
-          for (Object o: l) {
-            ll.add(toWarpScript(o));
+          
+          if (!field.getKey().isMapField()) {
+            List<Object> ll = new ArrayList<Object>(l.size());
+            for (Object o: l) {
+              ll.add(toWarpScript(o));
+            }
+            map.put(name, ll);            
+          } else {
+            Map<Object,Object> m = new LinkedHashMap<Object,Object>(l.size());
+            for (Object o: l) {
+              Map<Object,Object> valmap = (Map<Object,Object>) toWarpScript(o);
+              m.put(valmap.get(TOPB.MAP_KEY_KEY), valmap.get(TOPB.MAP_VALUE_KEY));
+            }
+            map.put(name, m);
           }
-          map.put(name, ll);
+          
+          // TODO(hbs): check if field.getKey().isMapField() is true and
+          //            generate a Map instead of a List
         } else {
           map.put(name, toWarpScript(value));
         }

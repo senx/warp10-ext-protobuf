@@ -17,6 +17,7 @@
 package io.warp10.ext.protobuf;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +38,13 @@ import io.warp10.script.WarpScriptStackFunction;
 import io.warp10.script.functions.TYPEOF;
 
 public class TOPB extends NamedWarpScriptFunction implements WarpScriptStackFunction {
+  
+  //
+  // Field names for inner message of map<> fields
+  // @see https://developers.google.com/protocol-buffers/docs/proto3#maps
+  //
+  static final String MAP_KEY_KEY = "key";
+  static final String MAP_VALUE_KEY = "value";
   
   public TOPB(String name) {
     super(name);
@@ -92,18 +100,36 @@ public class TOPB extends NamedWarpScriptFunction implements WarpScriptStackFunc
       if (!(name instanceof String)) {
         throw new WarpScriptException("Invalid key '" + String.valueOf(name) + "', must be a STRING.");
       }
+
       FieldDescriptor fd = type.findFieldByName((String) name);
+      
       if (null == fd) {        
         throw new WarpScriptException("Unknown field '" + name + "'.");
       }
-
+      
       REPEATED.clear();
       List<Object> repeated = REPEATED;
       
-      if (fd.isRepeated() && !(val instanceof List)) { 
-        throw new WarpScriptException("Field '" + name + "' must be a " + TYPEOF.TYPE_LIST + ".");
-      } else if (fd.isRepeated()) {
-        repeated = (List<Object>) val;
+      if (fd.isRepeated()) {
+        if (!fd.isMapField() && !(val instanceof List)) { 
+          throw new WarpScriptException("Field '" + name + "' must be a " + TYPEOF.TYPE_LIST + ".");
+        } else if (fd.isMapField()) {
+          if (!(val instanceof Map)) {
+            throw new WarpScriptException("Field '" + name + "' must be a " + TYPEOF.TYPE_MAP + ".");            
+          }
+          //
+          // We need to convert each key/value into a Map of its own and populate
+          // 'repeated' with those maps
+          //
+          for (Entry<Object,Object> mapentry: ((Map<Object,Object>) val).entrySet()) {
+            Map<Object,Object> mapvalue = new HashMap<Object,Object>(2);
+            mapvalue.put(MAP_KEY_KEY, mapentry.getKey());
+            mapvalue.put(MAP_VALUE_KEY, mapentry.getValue());
+            repeated.add(mapvalue);
+          }
+        } else {
+          repeated = (List<Object>) val;          
+        }
       } else {
         repeated.add(val);
       }

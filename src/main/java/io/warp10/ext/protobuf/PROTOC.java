@@ -149,7 +149,7 @@ public class PROTOC extends NamedWarpScriptFunction implements WarpScriptStackFu
         for (String dep: dependencyList) {
           FileDescriptor fd = pbdesc.getFD(dep);
           if (null == fd) {
-            throw new WarpScriptException(getName() + " missing dependency '" + fd + "', need to use the --include imports directive when running protoc.");
+            throw new WarpScriptException(getName() + " missing dependency '" + fd + "', need to use the --include_imports directive when running protoc.");
           } else {
             fda[idx++] = fd;
           }

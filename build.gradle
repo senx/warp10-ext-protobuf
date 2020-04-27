@@ -22,6 +22,7 @@ plugins {
   id 'signing'
   id 'maven-publish'
   id 'com.jfrog.bintray' version '1.8.1'
+  id 'antlr'
 }
 
 // ------------------------------------------------------------------
@@ -110,6 +111,8 @@ dependencies {
   //
   //compile group: 'GROUP', name: 'NAME', version: 'VERSION'
   compile 'com.google.protobuf:protobuf-java:3.11.4'
+
+  antlr 'org.antlr:antlr4:4.7'
 
   testCompile'io.warp10:warpscript:+'
   testImplementation 'junit:junit:4.12'
@@ -265,5 +268,18 @@ signing {
     useGpgCmd()
     sign publishing.publications.uberjar
     sign publishing.publications.stdjar
+  }
+}
+
+generateGrammarSource {
+  arguments += [ '-package', 'io.warp10.ext.protobuf.antlr' ]
+
+  doLast {
+    copy {
+      from 'build/generated-src/antlr/main/'
+      include '*.*'
+      into 'build/generated-src/antlr/main/io/warp10/ext/protobuf/antlr'
+    }
+    project.delete fileTree('build/generated-src/antlr/main').include('*.*')
   }
 }

@@ -25,6 +25,7 @@ import io.warp10.warp.sdk.WarpScriptExtension;
 
 public class ProtobufWarpScriptExtension extends WarpScriptExtension {
   
+  public static final String PROTO_TYPEOF = "PROTO";
   public static final String PROTOC = "PROTOC";
   
   private static final Map<String,Object> functions;
@@ -35,12 +36,14 @@ public class ProtobufWarpScriptExtension extends WarpScriptExtension {
     functions.put(PROTOC, new PROTOC(PROTOC));
     functions.put("PB->", new PBTO("PB->"));
     functions.put("->PB", new TOPB("->PB"));
+    functions.put("PBTYPES", new PBTYPES("PBTYPES"));
+    functions.put("PBDUMP", new PBDUMP("PBDUMP"));
     
     TYPEOF.addResolver(new TYPEOF.TypeResolver() {      
       @Override
       public String typeof(Class clazz) {
         if (clazz.isAssignableFrom(ProtoDesc.class)) {
-          return "PROTO";
+          return PROTO_TYPEOF;
         }
         return null;
       }

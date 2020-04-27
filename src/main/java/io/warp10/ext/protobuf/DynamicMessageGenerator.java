@@ -46,9 +46,9 @@ import io.warp10.ext.protobuf.antlr.Protobuf3Parser.ProtoContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.TopLevelDefContext;
 import io.warp10.script.WarpScriptException;
 
-/**
- * @see https://github.com/antlr/grammars-v4/blob/master/protobuf3/Protobuf3.g4
- */
+//
+// @see <a href="https://github.com/antlr/grammars-v4/blob/master/protobuf3/Protobuf3.g4">Protobuf3 Grammar</a>
+//
 public class DynamicMessageGenerator {
   
   private String currentEnum = null;

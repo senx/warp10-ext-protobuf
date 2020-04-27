@@ -1,10 +1,10 @@
 {
   'name' 'PROTOC'
   'ext' 'io.warp10.ext.protobuf.ProtobufWarpScriptExtension'
-  'related' [ 'PB->' '->PB' ]
+  'related' [ 'PB->' '->PB' 'PBTYPES' 'PBDUMP' ]
   'desc'
   <'
- The `PROTOC` function builds a `PROTO` instance from a protobuf descriptor. The `PROTO` instance describes a set of [Protocol Buffers](https://developers.google.com/protocol-buffers) messages.
+ The `PROTOC` function builds a `PROTO` instance from a protobuf descriptor or protobuf syntax. The `PROTO` instance describes a set of [Protocol Buffers](https://developers.google.com/protocol-buffers) messages.
 
  A `PROTO` instance is needed to serialize and deserialize data to/from Protocol Buffers.
 
@@ -14,12 +14,18 @@
  protoc --include_imports --descriptor_set_out=/path/to/FileDescriptorSet.file file.proto
  ```
 
+or a `STRING` containing a textual description as described on the [Protocol Buffers](https://developers.google.com/protocol-buffers) website.
+
  The content of the produced `FileDescriptorSet.file` converted to a byte array will serve as the `desc` parameter in the call to `PROTOC`.
   '>
-  'sig' [ [ [ 'desc:BYTES'  ] [ 'proto:PROTO'  ] ] ] // Signature
+  'sig' [
+    [ [ 'desc:BYTES'  ] [ 'proto:PROTO'  ] ]
+    [ [ 'protobuf:STRING' ] [ 'proto:PROTO' ] ]
+  ]
   'params' {
     'desc' 'Byte array containing a serialized `FileDescriptorSet`, see above for `protoc` invocation to generate such set.'
     'proto' 'Internal representation of the `FileDescriptorSer`.'
+    'protobuf' 'Textual description of protocol buffers messages and enumerations.'
   }
   'examples' [
     <'
@@ -56,7 +62,5 @@ PROTOC
   %> TRY
 %>
 'macro' STORE
-
 // Unit tests
-
 $macro

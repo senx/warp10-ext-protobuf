@@ -1,0 +1,55 @@
+{
+  'name' 'PBTYPES'
+  'ext' 'io.warp10.ext.protobuf.ProtobufWarpScriptExtension'
+  'related' [ 'PB->' '->PB' 'PROTOC' 'PBDUMP' ]
+  'desc'
+  <'
+ The `PBTYPES` function extracts the names of messages and enumerations described in a `PROTO` instance.
+
+ Only the outer types will appear.
+  '>
+  'sig' [
+    [ [ 'proto:PROTO'  ] [ 'desc:MAP' ] ]
+  ]
+  'params' {
+    'desc' 'Map containing entries `enums` and `messages` whose values are lists of defined types.'
+    'proto' 'Internal representation of the `FileDescriptorSer`.'
+  }
+  'examples' [
+    <'
+//
+// Loads the definition of the following .proto as produced by
+// protoc --include_imports --descriptor_set_out=out in.proto
+//
+// in.proto:
+//
+// syntax = "proto3";
+//
+// message TestMessage {
+//   int64 id = 1;
+//   string comment = 2;
+// }
+//
+'CkwKCXRzdC5wcm90byI3CgtUZXN0TWVzc2FnZRIOCgJpZBgBIAEoA1ICaWQSGAoHY29tbWVudBgCIAEoCVIHY29tbWVudGIGcHJvdG8z' B64->
+PROTOC
+PBTYPES
+    '>
+  ]
+} 'info' STORE
+
+<%
+  !$info INFO
+  SAVE 'context' STORE
+  <%
+    'PBTYPES' EVAL
+  %>
+  <% // catch any exception
+    RETHROW
+  %>
+  <% // finally, restore the context
+    $context RESTORE
+  %> TRY
+%>
+'macro' STORE
+// Unit tests
+$macro

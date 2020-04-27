@@ -34,9 +34,11 @@ import com.google.protobuf.DynamicMessage;
 
 import io.warp10.continuum.gts.GeoTimeSerie.TYPE;
 import io.warp10.crypto.SipHashInline;
+import io.warp10.ext.protobuf.antlr.Protobuf3Lexer;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.EnumDefinitionContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.EnumFieldContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.FieldContext;
+import io.warp10.ext.protobuf.antlr.Protobuf3Parser.FieldOptionContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.MessageContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.OneofContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.OneofFieldContext;
@@ -168,9 +170,23 @@ public class DynamicMessageGenerator {
           throw new WarpScriptException("Unknown type '" + type + "'.");
         }
         
+        String defaultValue = null;
+        
+        // Extract default value
+        if (null != fc.fieldOptions()) {
+          for (FieldOptionContext foc: fc.fieldOptions().fieldOption()) {
+            if ("default".equals(foc.optionName().getText()) && null != foc.constant()) {
+              defaultValue = foc.constant().getText();
+            }
+          }
+        }
+        
         FieldDescriptorProto.Builder fbuilder = FieldDescriptorProto.newBuilder();
         if (repeated) {
           fbuilder.setLabel(Label.LABEL_REPEATED);
+        }
+        if (null != defaultValue) {
+          fbuilder.setDefaultValue(defaultValue);
         }
         fbuilder.setName(fname);
         fbuilder.setNumber(number);

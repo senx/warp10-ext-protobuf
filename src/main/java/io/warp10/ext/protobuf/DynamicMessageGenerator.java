@@ -244,9 +244,11 @@ public class DynamicMessageGenerator {
       }
       
       // Handle oneofs
-      int oneofidx = -1;
+      int oneofidx = 0;
       for(OneofContext oc: mc.messageBody().oneof()) {
         OneofDescriptorProto.Builder odpb = dpb.addOneofDeclBuilder();
+        odpb.setName(oc.oneofName().getText());
+
         for (OneofFieldContext ofc: oc.oneofField()) {
           boolean repeated = "repeated".equals(ofc.getChild(0).getText());
           String fname = ofc.fieldName().getText();
@@ -268,9 +270,10 @@ public class DynamicMessageGenerator {
             fbuilder.setTypeName(type);
           }
           fbuilder.setType(t);
-          fbuilder.setOneofIndex(oneofidx++);
+          fbuilder.setOneofIndex(oneofidx);
           dpb.addField(fbuilder);
         }
+        oneofidx++;
       }
       
       if (null == currentMessage) {

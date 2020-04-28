@@ -14,6 +14,7 @@ import java.util.Set;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.DescriptorProtos.DescriptorProto;
@@ -25,12 +26,14 @@ import com.google.protobuf.DescriptorProtos.FieldDescriptorProto.Type;
 import com.google.protobuf.DescriptorProtos.FieldOptions;
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto;
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet;
+import com.google.protobuf.DescriptorProtos.MessageOptions;
 import com.google.protobuf.DescriptorProtos.OneofDescriptorProto;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.DynamicMessage;
+import com.google.protobuf.MapField;
 
 import io.warp10.continuum.gts.GeoTimeSerie.TYPE;
 import io.warp10.crypto.SipHashInline;
@@ -39,6 +42,7 @@ import io.warp10.ext.protobuf.antlr.Protobuf3Parser.EnumDefinitionContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.EnumFieldContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.FieldContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.FieldOptionContext;
+import io.warp10.ext.protobuf.antlr.Protobuf3Parser.MapFieldContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.MessageContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.OneofContext;
 import io.warp10.ext.protobuf.antlr.Protobuf3Parser.OneofFieldContext;
@@ -197,6 +201,48 @@ public class DynamicMessageGenerator {
         fbuilder.setType(t);
         dpb.addField(fbuilder);
       }
+      
+      // Handle map fields
+      for (MapFieldContext mfc: mc.messageBody().mapField()) {
+        String fname = mfc.mapName().getText();
+        int number = Integer.parseInt(mfc.fieldNumber().getText());
+        String keyType = mfc.keyType().getText();
+        String valueType = mfc.typeRule().getText();
+        
+        if (!knownTypes.containsKey(valueType)) {
+          throw new WarpScriptException("Unknown map value type '" + valueType + "'.");
+        }
+        
+        String mapEntryName = StringUtils.capitalize(fname) + "Entry";
+        
+        DescriptorProto.Builder mapEntry = DescriptorProto.newBuilder();
+        mapEntry.setName(mapEntryName);
+        mapEntry.setOptions(MessageOptions.newBuilder().setMapEntry(true).build());
+        FieldDescriptorProto.Builder keyField = FieldDescriptorProto.newBuilder();
+        keyField.setName(TOPB.MAP_KEY_KEY);
+        keyField.setType(knownTypes.get(keyType));
+        keyField.setNumber(1);
+        mapEntry.addField(keyField);
+        FieldDescriptorProto.Builder valueField = FieldDescriptorProto.newBuilder();
+        valueField.setName(TOPB.MAP_VALUE_KEY);
+        valueField.setType(knownTypes.get(valueType));
+        if (Type.TYPE_ENUM == knownTypes.get(valueType) || Type.TYPE_MESSAGE == knownTypes.get(valueType)) {
+          keyField.setTypeName(valueType);
+        }
+        valueField.setNumber(2);
+        mapEntry.addField(valueField);        
+        dpb.addNestedType(mapEntry);
+        
+        FieldDescriptorProto.Builder fbuilder = FieldDescriptorProto.newBuilder();
+        fbuilder.setLabel(Label.LABEL_REPEATED);
+        fbuilder.setName(fname);
+        fbuilder.setNumber(number);
+        fbuilder.setType(Type.TYPE_MESSAGE);
+        fbuilder.setTypeName(mapEntryName);
+        
+        dpb.addField(fbuilder);
+      }
+      
       // Handle oneofs
       int oneofidx = -1;
       for(OneofContext oc: mc.messageBody().oneof()) {

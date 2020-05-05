@@ -98,13 +98,15 @@ public class TOPB extends NamedWarpScriptFunction implements WarpScriptStackFunc
       Object name = entry.getKey();
       Object val = entry.getValue();
       if (!(name instanceof String)) {
-        throw new WarpScriptException("Invalid key '" + String.valueOf(name) + "', must be a STRING.");
+        // Ignore non String keys
+        continue;
       }
 
       FieldDescriptor fd = type.findFieldByName((String) name);
       
-      if (null == fd) {        
-        throw new WarpScriptException("Unknown field '" + name + "'.");
+      if (null == fd) {
+        // Ignore unknown fields
+        continue;
       }
       
       REPEATED.clear();

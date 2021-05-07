@@ -54,26 +54,32 @@ public class TOPB extends NamedWarpScriptFunction implements WarpScriptStackFunc
   public Object apply(WarpScriptStack stack) throws WarpScriptException {
     Object top = stack.pop();
     
-    if (!(top instanceof String)) {
-      throw new WarpScriptException(getName() + " expects a type name.");
+    Descriptor typeDesc;
+    
+    if (top instanceof Descriptor) {
+      typeDesc = (Descriptor) top;
+    } else {
+      if (!(top instanceof String)) {
+        throw new WarpScriptException(getName() + " expects a type name.");
+      }
+      
+      String type = (String) top;
+      
+      top = stack.pop();
+      
+      if (!(top instanceof ProtoDesc)) {
+        throw new WarpScriptException(getName() + " expects a protobuf descriptor.");
+      }
+      
+      ProtoDesc desc = (ProtoDesc) top;
+      
+      typeDesc = desc.getMessageType(type);      
+
+      if (null == typeDesc) {
+        throw new WarpScriptException(getName() + " unknown type '" + type + "', not in " + desc.getTypes() + ".");
+      }
     }
-    
-    String type = (String) top;
-    
-    top = stack.pop();
-    
-    if (!(top instanceof ProtoDesc)) {
-      throw new WarpScriptException(getName() + " expects a protobuf descriptor.");
-    }
-    
-    ProtoDesc desc = (ProtoDesc) top;
-    
-    Descriptor typeDesc = desc.getMessageType(type);
-    
-    if (null == typeDesc) {
-      throw new WarpScriptException(getName() + " unknown type '" + type + "', not in " + desc.getTypes() + ".");
-    }
-    
+        
     top = stack.pop();
     
     if (!(top instanceof Map)) {

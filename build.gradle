@@ -1,5 +1,5 @@
 //
-//   Copyright 2019  SenX S.A.S.
+//   Copyright 2019-2021  SenX S.A.S.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -83,15 +83,7 @@ wrapper {
 //
 
 repositories {
-  jcenter()
-  
-  maven {
-    url 'https://dl.bintray.com/senx/maven'
-  }
-
-  maven {
-    url 'https://dl.bintray.com/hbs/maven'
-  }
+  mavenCentral()
 }
 
 configurations {
@@ -104,13 +96,14 @@ configurations {
 //
 
 dependencies {
-  provided 'io.warp10:warpscript:+'
+  //provided 'io.warp10:warpscript:+'
+  provided 'io.warp10:warpscript:2.8.1'
 
   //
   // Insert your dependencies here
   //
   //compile group: 'GROUP', name: 'NAME', version: 'VERSION'
-  compile 'com.google.protobuf:protobuf-java:3.11.4'
+  compile 'com.google.protobuf:protobuf-java:3.15.8'
 
   antlr 'org.antlr:antlr4:4.7'
 

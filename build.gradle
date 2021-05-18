@@ -147,6 +147,16 @@ publishing {
 nexusPublishing {
   repositories {
     sonatype()
+    if (project.hasProperty("nexusUsername")) {
+      maven {
+        name "nexus"
+        url "$nexusHost/repository/maven-releases/"
+        credentials {
+          username nexusUsername
+          password nexusPassword
+        }
+      }
+    }
   }
 }
 

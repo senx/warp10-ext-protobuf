@@ -89,8 +89,6 @@ jar {
 }
 
 shadowJar {
-    classifier = 'uberjar'
-
     from('src/main/warpscript') {
         //
         // Only consider macros which are in our namespace

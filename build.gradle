@@ -162,6 +162,7 @@ publishing {
         if (project.hasProperty("nexusUsername")) {
             maven {
                 name "nexus"
+                allowInsecureProtocol true
                 url "$nexusHost/repository/maven-releases/"
                 credentials {
                     username nexusUsername

@@ -140,9 +140,7 @@ publishing {
         }
     }
 }
-artifacts {
-    archives shadowJar, javadocJar, sourcesJar
-}
+
 nexusPublishing {
     repositories {
         sonatype {

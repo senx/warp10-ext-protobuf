@@ -15,15 +15,16 @@
 //
 
 plugins {
-  id 'java'
-  id 'maven-publish'
-  id 'signing'
-  id 'com.github.johnrengelman.shadow' version '7.0.0'
-  id 'net.nemerosa.versioning' version '2.14.0'
-  id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
-  id 'antlr'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+    id 'net.nemerosa.versioning' version '2.14.0'
+    id 'io.codearte.nexus-staging' version '0.22.0'
+    id 'antlr'
+    id 'java'
+    id 'java-library'
+    id 'idea'
+    id 'maven-publish'
+    id "signing"
 }
-
 
 project.group = 'io.warp10'
 project.description = ''
@@ -36,7 +37,7 @@ project.version = versioning.info.lastTag + ((versioning.info.tag != null) ? '' 
 //
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 //
@@ -44,64 +45,64 @@ repositories {
 //
 
 dependencies {
-  //
-  // Insert your dependencies here
-  //
-  //implementation group: 'GROUP', name: 'NAME', version: 'VERSION', classifier: 'CLASSIFIER'
+    //
+    // Insert your dependencies here
+    //
+    //implementation group: 'GROUP', name: 'NAME', version: 'VERSION', classifier: 'CLASSIFIER'
 
-  implementation 'com.google.protobuf:protobuf-java:3.15.8'
+    implementation 'com.google.protobuf:protobuf-java:3.15.8'
 
-  antlr 'org.antlr:antlr4:4.7'
+    antlr 'org.antlr:antlr4:4.7'
 
-  // Use JUnit test framework.
-  testImplementation 'junit:junit:4.13'
+    // Use JUnit test framework.
+    testImplementation 'junit:junit:4.13'
 
-  // Compile time only dependencies, not used at runtime, or provided by other dependencies.
-  compileOnly group: 'io.warp10', name: 'warpscript', version: '2.+'
+    // Compile time only dependencies, not used at runtime, or provided by other dependencies.
+    compileOnly group: 'io.warp10', name: 'warpscript', version: '2.+'
 }
 
 java {
-  withJavadocJar()
-  withSourcesJar()
+    withJavadocJar()
+    withSourcesJar()
 }
 
 jar {
-  manifest {
-   attributes('WarpFleet-Description': project.description)
-   attributes('WarpFleet-Group': project.group)
-   attributes('WarpFleet-Artifact': project.name)
-   attributes('WarpFleet-Version': project.version)
-  }
+    manifest {
+        attributes('WarpFleet-Description': project.description)
+        attributes('WarpFleet-Group': project.group)
+        attributes('WarpFleet-Artifact': project.name)
+        attributes('WarpFleet-Version': project.version)
+    }
 
-  from('src/main/warpscript') {
-    //
-    // Only consider macros which are in our namespace
-    //
-    include project.group + '/' + project.name + '/*.mc2'
-    include project.group + '/' + project.name + '/**/*.mc2'
-  }
+    from('src/main/warpscript') {
+        //
+        // Only consider macros which are in our namespace
+        //
+        include project.group + '/' + project.name + '/*.mc2'
+        include project.group + '/' + project.name + '/**/*.mc2'
+    }
 
-  from('.') {
-    include 'README.md'
-    include project.group + '-' + project.name + '.conf'
-  }
+    from('.') {
+        include 'README.md'
+        include project.group + '-' + project.name + '.conf'
+    }
 }
 
 shadowJar {
-  classifier = 'uberjar'
+    classifier = 'uberjar'
 
-  from('src/main/warpscript') {
-    //
-    // Only consider macros which are in our namespace
-    //
-    include project.group + '/' + project.name + '/*.mc2'
-    include project.group + '/' + project.name + '/**/*.mc2'
-  }
+    from('src/main/warpscript') {
+        //
+        // Only consider macros which are in our namespace
+        //
+        include project.group + '/' + project.name + '/*.mc2'
+        include project.group + '/' + project.name + '/**/*.mc2'
+    }
 
-  from('.') {
-    include 'README.md'
-    include project.group + '-' + project.name + '.conf'
-  }
+    from('.') {
+        include 'README.md'
+        include project.group + '-' + project.name + '.conf'
+    }
 }
 
 
@@ -110,74 +111,99 @@ shadowJar {
 //
 
 publishing {
-  publications {
-    module(MavenPublication) {
-      from components.java
+    publications {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            artifact(shadowJar)
+            artifact(tasks["javadocJar"])
+            artifact(tasks["sourcesJar"])
 
-      pom {
-        name = project.name
-        description = project.description
-        url = 'https://github.com/senx/' + project.name
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/senx/' + project.name
 
-        scm {
-          connection = 'scm:git:git://github.com/senx/' + project.name
-          developerConnection = 'scm:git:ssh://github.com/senx/' + project.name
-          url = 'https://github.com/senx/' + project.name
+                scm {
+                    connection = 'scm:git:git://github.com/senx/' + project.name
+                    developerConnection = 'scm:git:ssh://github.com/senx/' + project.name
+                    url = 'https://github.com/senx/' + project.name
+                }
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'senx'
+                        name = 'SenX'
+                        email = 'contact@senx.io'
+                    }
+                }
+            }
         }
-
-        licenses {
-          license {
-            name = 'The Apache License, Version 2.0'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-          }
-        }
-
-        developers {
-          developer {
-            id = 'senx'
-            name = 'SenX'
-            email = 'contact@senx.io'
-          }
-        }
-      }
     }
-  }
+
+    repositories {
+        if (project.hasProperty("ossrhUsername")) {
+            maven {
+                url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
+        }
+        if (project.hasProperty("nexusUsername")) {
+            maven {
+                name "nexus"
+                allowInsecureProtocol true
+                url "$nexusHost/repository/maven-releases/"
+                credentials {
+                    username nexusUsername
+                    password nexusPassword
+                }
+            }
+        }
+    }
 }
 
-nexusPublishing {
-  repositories {
-    sonatype()
-    if (project.hasProperty("nexusUsername")) {
-      maven {
-        name "nexus"
-        url "$nexusHost/repository/maven-releases/"
-        credentials {
-          username nexusUsername
-          password nexusPassword
-        }
-      }
+artifacts {
+    archives shadowJar, javadocJar, sourcesJar
+}
+
+if (project.hasProperty("ossrhUsername")) {
+    nexusStaging {
+        packageGroup = "io.warp10"
+        username ossrhUsername
+        password ossrhPassword
     }
-  }
 }
 
 //
 // Artifact Signing
 //
 
-signing {
-  useGpgCmd()
-  sign publishing.publications
+if (project.hasProperty("signing.gnupg.keyName")) {
+    signing {
+        useGpgCmd()
+        sign publishing.publications
+    }
 }
 
 generateGrammarSource {
-  arguments += [ '-package', 'io.warp10.ext.protobuf.antlr' ]
+    arguments += ['-package', 'io.warp10.ext.protobuf.antlr']
 
-  doLast {
-    copy {
-      from 'build/generated-src/antlr/main/'
-      include '*.*'
-      into 'build/generated-src/antlr/main/io/warp10/ext/protobuf/antlr'
+    doLast {
+        copy {
+            from 'build/generated-src/antlr/main/'
+            include '*.*'
+            into 'build/generated-src/antlr/main/io/warp10/ext/protobuf/antlr'
+        }
+        project.delete fileTree('build/generated-src/antlr/main').include('*.*')
     }
-    project.delete fileTree('build/generated-src/antlr/main').include('*.*')
-  }
 }

@@ -15,15 +15,13 @@
 //
 
 plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
     id 'net.nemerosa.versioning' version '2.14.0'
-    id 'io.codearte.nexus-staging' version '0.22.0'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'antlr'
-    id 'java'
-    id 'java-library'
-    id 'idea'
-    id 'maven-publish'
-    id "signing"
 }
 
 project.group = 'io.warp10'
@@ -109,16 +107,42 @@ shadowJar {
 //
 // Maven related config
 //
-
 publishing {
     publications {
-        maven(MavenPublication) {
-            groupId project.group
-            artifactId project.name
+        module(MavenPublication) {
+            from components.java
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/senx/' + project.name
+
+                scm {
+                    connection = 'scm:git:git://github.com/senx/' + project.name
+                    developerConnection = 'scm:git:ssh://github.com/senx/' + project.name
+                    url = 'https://github.com/senx/' + project.name
+                }
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'senx'
+                        name = 'SenX'
+                        email = 'contact@senx.io'
+                    }
+                }
+            }
+        }
+        uberJar(MavenPublication) {
             artifact(shadowJar)
             artifact(tasks["javadocJar"])
             artifact(tasks["sourcesJar"])
-
+            version = project.version + '-uberjar'
             pom {
                 name = project.name
                 description = project.description
@@ -147,47 +171,25 @@ publishing {
             }
         }
     }
+}
 
+nexusPublishing {
     repositories {
-        if (project.hasProperty("ossrhUsername")) {
-            maven {
-                url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                credentials {
-                    username ossrhUsername
-                    password ossrhPassword
-                }
-            }
+        sonatype {
+            username = ossrhUsername
+            password = ossrhPassword
         }
-        if (project.hasProperty("nexusUsername")) {
-            maven {
-                name "nexus"
-                allowInsecureProtocol true
-                url "$nexusHost/repository/maven-releases/"
-                credentials {
-                    username nexusUsername
-                    password nexusPassword
-                }
-            }
+        myNexus {
+            nexusUrl = uri("$nexusHost/repository/maven-releases/")
+            username = nexusUsername
+            password = nexusPassword
         }
-    }
-}
-
-artifacts {
-    archives shadowJar, javadocJar, sourcesJar
-}
-
-if (project.hasProperty("ossrhUsername")) {
-    nexusStaging {
-        packageGroup = "io.warp10"
-        username ossrhUsername
-        password ossrhPassword
     }
 }
 
 //
 // Artifact Signing
 //
-
 if (project.hasProperty("signing.gnupg.keyName")) {
     signing {
         useGpgCmd()

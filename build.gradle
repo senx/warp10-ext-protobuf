@@ -15,9 +15,6 @@
 //
 
 plugins {
-    id 'java'
-    id 'maven-publish'
-    id 'signing'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
     id 'net.nemerosa.versioning' version '2.14.0'
     id 'io.codearte.nexus-staging' version '0.22.0'
@@ -26,7 +23,6 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'java-library'
 apply plugin: 'idea'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: "signing"
 
@@ -185,21 +181,6 @@ if (project.hasProperty("ossrhUsername")) {
         packageGroup = "io.warp10"
         username ossrhUsername
         password ossrhPassword
-    }
-}
-nexusPublishing {
-    repositories {
-        sonatype()
-        //if (project.hasProperty("nexusUsername")) {
-            maven {
-                name "nexus"
-                url "$nexusHost/repository/maven-releases/"
-                credentials {
-                    username nexusUsername
-                    password nexusPassword
-                }
-            }
-       // }
     }
 }
 

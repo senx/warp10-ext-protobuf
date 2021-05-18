@@ -44,8 +44,7 @@ pipeline {
                 message "Should we deploy libs?"
             }
             steps {
-                sh './gradlew $GRADLE_ARGS publishModulePublicationToMyNexusRepository -x test'
-                sh './gradlew $GRADLE_ARGS publishUberJarPublicationToMyNexusRepository -x test'
+                sh './gradlew $GRADLE_ARGS publishAllPublicationsToNexusRepository -x test'
             }
         }
 
@@ -62,9 +61,9 @@ pipeline {
                         message 'Should we deploy to Maven Central?'
                     }
                     steps {
-                        sh './gradlew publishAllPublicationsToSonatypeRepository $GRADLE_ARGS'
-                        sh './gradlew closeSonatypeStagingRepository $GRADLE_ARGS'
-                        sh './gradlew releaseSonatypeStagingRepository $GRADLE_ARGS'
+                        sh './gradlew publishAllPublicationsToMavenRepository $GRADLE_ARGS'
+                        sh './gradlew closeRepository $GRADLE_ARGS'
+                        sh './gradlew releaseRepository $GRADLE_ARGS'
                         this.notifyBuild('PUBLISHED', version)
                     }
                 }

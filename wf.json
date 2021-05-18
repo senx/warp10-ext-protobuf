@@ -3,7 +3,7 @@
   "group": "io.warp10",
   "artifact": "warp10-ext-protobuf",
   "version": "0.0.0",
-  "description": "Protocol Buffers WarpScript Extension",
+  "description": "Protocol Buffer WarpScript Extension",
   "author": "SenX",
   "email": "contact@senx.io",
   "license": "Apache-2.0",

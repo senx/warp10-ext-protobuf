@@ -45,6 +45,7 @@ pipeline {
             }
             steps {
                 sh './gradlew $GRADLE_ARGS publishModulePublicationToMyNexusRepository -x test'
+                sh './gradlew $GRADLE_ARGS publishUberJarPublicationToMyNexusRepository -x test'
             }
         }
 
@@ -61,9 +62,9 @@ pipeline {
                         message 'Should we deploy to Maven Central?'
                     }
                     steps {
-                        sh './gradlew publish $GRADLE_ARGS'
-                        sh './gradlew closeRepository $GRADLE_ARGS'
-                        sh './gradlew releaseRepository $GRADLE_ARGS'
+                        sh './gradlew publishAllPublicationsToSonatypeRepository $GRADLE_ARGS'
+                        sh './gradlew closeSonatypeStagingRepository $GRADLE_ARGS'
+                        sh './gradlew releaseSonatypeStagingRepository $GRADLE_ARGS'
                         this.notifyBuild('PUBLISHED', version)
                     }
                 }

@@ -138,6 +138,38 @@ publishing {
                 }
             }
         }
+        uberJar(MavenPublication) {
+            artifact(shadowJar)
+            artifact(tasks["javadocJar"])
+            artifact(tasks["sourcesJar"])
+            version = project.version + '-uberjar'
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/senx/' + project.name
+
+                scm {
+                    connection = 'scm:git:git://github.com/senx/' + project.name
+                    developerConnection = 'scm:git:ssh://github.com/senx/' + project.name
+                    url = 'https://github.com/senx/' + project.name
+                }
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'senx'
+                        name = 'SenX'
+                        email = 'contact@senx.io'
+                    }
+                }
+            }
+        }
     }
 }
 

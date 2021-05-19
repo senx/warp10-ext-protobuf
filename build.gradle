@@ -89,6 +89,8 @@ jar {
 }
 
 shadowJar {
+    classifier = ''
+
     from('src/main/warpscript') {
         //
         // Only consider macros which are in our namespace
@@ -142,6 +144,7 @@ publishing {
                 }
             }
         }
+
         uberJar(MavenPublication) {
             groupId project.group
             artifactId project.name

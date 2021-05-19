@@ -15,13 +15,15 @@
 //
 
 plugins {
-    id 'java-library'
-    id 'maven-publish'
-    id 'signing'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
     id 'net.nemerosa.versioning' version '2.14.0'
-    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+    id 'io.codearte.nexus-staging' version '0.22.0'
     id 'antlr'
+    id 'java'
+    id 'java-library'
+    id 'idea'
+    id 'maven-publish'
+    id "signing"
 }
 
 project.group = 'io.warp10'
@@ -87,8 +89,6 @@ jar {
 }
 
 shadowJar {
-    classifier = 'uberjar'
-
     from('src/main/warpscript') {
         //
         // Only consider macros which are in our namespace
@@ -107,9 +107,13 @@ shadowJar {
 //
 // Maven related config
 //
+
 publishing {
     publications {
-        module(MavenPublication) {
+        maven(MavenPublication) {
+            groupId project.group
+            artifactId project.name
+            version = project.version
             from components.java
             pom {
                 name = project.name
@@ -139,10 +143,13 @@ publishing {
             }
         }
         uberJar(MavenPublication) {
+            groupId project.group
+            artifactId project.name
             artifact(shadowJar)
             artifact(tasks["javadocJar"])
             artifact(tasks["sourcesJar"])
             version = project.version + '-uberjar'
+
             pom {
                 name = project.name
                 description = project.description
@@ -171,25 +178,47 @@ publishing {
             }
         }
     }
+
+    repositories {
+        if (project.hasProperty("ossrhUsername")) {
+            maven {
+                url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
+        }
+        if (project.hasProperty("nexusUsername")) {
+            maven {
+                name "nexus"
+                allowInsecureProtocol true
+                url "$nexusHost/repository/maven-releases/"
+                credentials {
+                    username nexusUsername
+                    password nexusPassword
+                }
+            }
+        }
+    }
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            username = ossrhUsername
-            password = ossrhPassword
-        }
-        myNexus {
-            nexusUrl = uri("$nexusHost/repository/maven-releases/")
-            username = nexusUsername
-            password = nexusPassword
-        }
+artifacts {
+    archives shadowJar, javadocJar, sourcesJar
+}
+
+if (project.hasProperty("ossrhUsername")) {
+    nexusStaging {
+        packageGroup = "io.warp10"
+        username ossrhUsername
+        password ossrhPassword
     }
 }
 
 //
 // Artifact Signing
 //
+
 if (project.hasProperty("signing.gnupg.keyName")) {
     signing {
         useGpgCmd()
